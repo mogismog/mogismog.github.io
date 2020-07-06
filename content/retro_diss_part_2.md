@@ -7,7 +7,7 @@ Author: fma
 Summary: Exploring The Storm Prediction Center's Tornado Reports Database
 
 
-*In [Part 1](some_link) of Retrospective Dissertation, we went over the data science problem we'll be tackling and why I'm masochistic enough to go through dissertation research again. In Part 2, we'll go over exploring the tornado report dataset from the Storm Prediction Center. This will be used to generate labels for our prediction model.*
+*In [Part 1](https://mogismog.github.io/retro-diss-part-1.html) of Retrospective Dissertation, we went over the data science problem we'll be tackling and why I'm masochistic enough to go through dissertation research again. In Part 2, we'll go over exploring the tornado report dataset from the Storm Prediction Center. This will be used to generate labels for our prediction model.*
 
 http://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf
 The [Storm Prediction Center (SPC)](http://www.spc.noaa.gov) provides both excellent severe weather forecasts and datasets of historical severe weather events. Their [severe weather database files](http://www.spc.noaa.gov/wcm/#data) have observed severe weather reports dating back to 1950 for hail, wind, and tornado events, though we'll only be focusing on the tornado reports. There are some big caveats and limitations that come with the tornado reports dataset that we'll get into in this post, but it's a great public dataset that is constantly being updated.
@@ -92,7 +92,7 @@ tornado_df.head()
 
 ### Unknown/non-CST timezones
 
-The SPC data format doc said mentioned some things to look out for in a few of the columns, so we should make sure we account for that. First, we'll see how many different timezones we have in our dataset. A quick group-by operation shows we have 37 reports that aren't in CST (identified as `3`). There are so few that aren't that we can just filter them out:
+The SPC data format doc mentioned some things to look out for in a few of the columns, one of the being that all reports should be in the CST time zone (regardless of the time of year), though some reports may not be listed as being in CST. First, we'll see how many different timezones we have in our dataset. A quick group-by operation shows we have 37 reports that aren't in CST (identified as `3`). There are so few that aren't that we can just filter them out:
 
 ```python
 tornado_df.timezone.value_counts()
@@ -112,7 +112,7 @@ tornado_df = tornado_df.loc[tornado_df.timezone == 3]
 
 ### Unknown F/EF scale
 
-The SPC documentation says -9 represents an "unknown" E/F Scale value. It looks like these values are in 2016, 2017, and 2018, which makes sense since those are possibly preliminary. Given there are only 111 of these observations, we'll just filter them out:
+The SPC documentation also says -9 represents an "unknown" E/F Scale value. Taking the same approach, we can see the counts of each unique F/EF scale within our dataset. Given there are only 111 of these observations, we'll just filter them out:
 
 ```python
 tornado_df.f_or_ef_scale.value_counts()
@@ -234,7 +234,15 @@ Now, let's save this file as a csv and call it a day!
 tornado_df.to_csv('../data/cleaned_tornado_reports.csv', index=False)
 ```
 
-Great, we now have a (relatively) cleaned dataset of tornado reports! Let's say, instead of doing all of this within a Jupyter notebook, we wanted to run all of this data cleaning within a script, we ought to write functions to do this (something I _definitely_ didn't do in grad school), so let's do that right now. This also can be used on the command line via click (which I've added to `redissertation/data.py`):
+## 3. Amount of Time Taken
+
+Unfortunately, I wasn't able to find the specific code I used to do this EDA the first time around, but I can tell you what I recall:
+
+- I didn't use `pandas` because I had no idea it existed.
+- I used built-in modules to parse the file as a CSV 
+- It took me probably a month or so to do this the first time, whereas this notebook took me about 20 or so minutes to put together.
+
+Wow, 20 minutes! That would have provided me a lot more time to ~watch Major League and play Super Mario Kart~ do more research back in the day. We now have a (relatively) cleaned dataset of tornado reports! Let's say, instead of doing all of this within a Jupyter notebook, we wanted to run all of this data cleaning within a script, we ought to write functions to do this (something I _definitely_ didn't do in grad school), so let's do that right now. This also can be used on the command line via click (which I've added to `redissertation/data.py`):
 
 ```python
 from typing import List, Dict
