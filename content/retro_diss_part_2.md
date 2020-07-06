@@ -242,7 +242,7 @@ Unfortunately, I wasn't able to find the specific code I used to do this EDA the
 - I used built-in modules to parse the file as a CSV 
 - It took me probably a month or so to do this the first time, whereas this notebook took me about 20 or so minutes to put together.
 
-Wow, 20 minutes! That would have provided me a lot more time to ~watch Major League and play Super Mario Kart~ do more research back in the day. We now have a (relatively) cleaned dataset of tornado reports! Let's say, instead of doing all of this within a Jupyter notebook, we wanted to run all of this data cleaning within a script, we ought to write functions to do this (something I _definitely_ didn't do in grad school), so let's do that right now. This also can be used on the command line via click (which I've added to `redissertation/data.py`):
+Wow, 20 minutes! That would have provided me a lot more time to ~~watch Major League and play Super Mario Kart~~ do more research back in the day. We now have a (relatively) cleaned dataset of tornado reports! Let's say, instead of doing all of this within a Jupyter notebook, we wanted to run all of this data cleaning within a script, we ought to write functions to do this (something I _definitely_ didn't do in grad school), so let's do that right now. This also can be used on the command line via click (which I've added to `redissertation/data.py`):
 
 ```python
 from typing import List, Dict
