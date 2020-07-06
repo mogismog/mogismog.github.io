@@ -76,7 +76,7 @@ The &lt;a href="http://www.spc.noaa.gov"&gt;Storm Prediction Center (SPC)&lt;/a&
 
 &lt;h2&gt;1. Cleaning Our Data&lt;/h2&gt;
 &lt;h3&gt;Unknown/non-CST timezones&lt;/h3&gt;
-&lt;p&gt;The SPC data format doc said mentioned some things to look out for in a few of the columns, so we should make sure we account for that. First, we'll see how many different timezones we have in our dataset. A quick group-by operation shows we have 37 reports that aren't in CST (identified as &lt;code&gt;3&lt;/code&gt;). There are so few that aren't that we can just filter them out:&lt;/p&gt;
+&lt;p&gt;The SPC data format doc mentioned some things to look out for in a few of the columns, one of the being that all reports should be in the CST time zone (regardless of the time of year), though some reports may not be listed as being in CST. First, we'll see how many different timezones we have in our dataset. A quick group-by operation shows we have 37 reports that aren't in CST (identified as &lt;code&gt;3&lt;/code&gt;). There are so few that aren't that we can just filter them out:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;tornado_df&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;timezone&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value_counts&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -112,7 +112,7 @@ The &lt;a href="http://www.spc.noaa.gov"&gt;Storm Prediction Center (SPC)&lt;/a&
 
 
 &lt;h3&gt;Unknown F/EF scale&lt;/h3&gt;
-&lt;p&gt;The SPC documentation says -9 represents an "unknown" E/F Scale value. It looks like these values are in 2016, 2017, and 2018, which makes sense since those are possibly preliminary. Given there are only 111 of these observations, we'll just filter them out:&lt;/p&gt;
+&lt;p&gt;The SPC documentation also says -9 represents an "unknown" E/F Scale value. Taking the same approach, we can see the counts of each unique F/EF scale within our dataset. Given there are only 111 of these observations, we'll just filter them out:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;tornado_df&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;f_or_ef_scale&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value_counts&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -284,7 +284,14 @@ The &lt;a href="http://www.spc.noaa.gov"&gt;Storm Prediction Center (SPC)&lt;/a&
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Great, we now have a (relatively) cleaned dataset of tornado reports! Let's say, instead of doing all of this within a Jupyter notebook, we wanted to run all of this data cleaning within a script, we ought to write functions to do this (something I &lt;em&gt;definitely&lt;/em&gt; didn't do in grad school), so let's do that right now. This also can be used on the command line via click (which I've added to &lt;code&gt;redissertation/data.py&lt;/code&gt;):&lt;/p&gt;
+&lt;h2&gt;3. Amount of Time Taken&lt;/h2&gt;
+&lt;p&gt;Unfortunately, I wasn't able to find the specific code I used to do this EDA the first time around, but I can tell you what I recall:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;I didn't use &lt;code&gt;pandas&lt;/code&gt; because I had no idea it existed.&lt;/li&gt;
+&lt;li&gt;I used built-in modules to parse the file as a CSV &lt;/li&gt;
+&lt;li&gt;It took me probably a month or so to do this the first time, whereas this notebook took me about 20 or so minutes to put together.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Wow, 20 minutes! That would have provided me a lot more time to ~watch Major League and play Super Mario Kart~ do more research back in the day. We now have a (relatively) cleaned dataset of tornado reports! Let's say, instead of doing all of this within a Jupyter notebook, we wanted to run all of this data cleaning within a script, we ought to write functions to do this (something I &lt;em&gt;definitely&lt;/em&gt; didn't do in grad school), so let's do that right now. This also can be used on the command line via click (which I've added to &lt;code&gt;redissertation/data.py&lt;/code&gt;):&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;typing&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Dict&lt;/span&gt;
 
 

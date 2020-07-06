@@ -198,7 +198,7 @@ The <a href="http://www.spc.noaa.gov">Storm Prediction Center (SPC)</a> provides
 
 <h2>1. Cleaning Our Data</h2>
 <h3>Unknown/non-CST timezones</h3>
-<p>The SPC data format doc said mentioned some things to look out for in a few of the columns, so we should make sure we account for that. First, we'll see how many different timezones we have in our dataset. A quick group-by operation shows we have 37 reports that aren't in CST (identified as <code>3</code>). There are so few that aren't that we can just filter them out:</p>
+<p>The SPC data format doc mentioned some things to look out for in a few of the columns, one of the being that all reports should be in the CST time zone (regardless of the time of year), though some reports may not be listed as being in CST. First, we'll see how many different timezones we have in our dataset. A quick group-by operation shows we have 37 reports that aren't in CST (identified as <code>3</code>). There are so few that aren't that we can just filter them out:</p>
 <div class="highlight"><pre><span></span><code><span class="n">tornado_df</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </code></pre></div>
 
@@ -234,7 +234,7 @@ The <a href="http://www.spc.noaa.gov">Storm Prediction Center (SPC)</a> provides
 
 
 <h3>Unknown F/EF scale</h3>
-<p>The SPC documentation says -9 represents an "unknown" E/F Scale value. It looks like these values are in 2016, 2017, and 2018, which makes sense since those are possibly preliminary. Given there are only 111 of these observations, we'll just filter them out:</p>
+<p>The SPC documentation also says -9 represents an "unknown" E/F Scale value. Taking the same approach, we can see the counts of each unique F/EF scale within our dataset. Given there are only 111 of these observations, we'll just filter them out:</p>
 <div class="highlight"><pre><span></span><code><span class="n">tornado_df</span><span class="o">.</span><span class="n">f_or_ef_scale</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 </code></pre></div>
 
@@ -406,7 +406,14 @@ The <a href="http://www.spc.noaa.gov">Storm Prediction Center (SPC)</a> provides
 </code></pre></div>
 
 
-<p>Great, we now have a (relatively) cleaned dataset of tornado reports! Let's say, instead of doing all of this within a Jupyter notebook, we wanted to run all of this data cleaning within a script, we ought to write functions to do this (something I <em>definitely</em> didn't do in grad school), so let's do that right now. This also can be used on the command line via click (which I've added to <code>redissertation/data.py</code>):</p>
+<h2>3. Amount of Time Taken</h2>
+<p>Unfortunately, I wasn't able to find the specific code I used to do this EDA the first time around, but I can tell you what I recall:</p>
+<ul>
+<li>I didn't use <code>pandas</code> because I had no idea it existed.</li>
+<li>I used built-in modules to parse the file as a CSV </li>
+<li>It took me probably a month or so to do this the first time, whereas this notebook took me about 20 or so minutes to put together.</li>
+</ul>
+<p>Wow, 20 minutes! That would have provided me a lot more time to ~watch Major League and play Super Mario Kart~ do more research back in the day. We now have a (relatively) cleaned dataset of tornado reports! Let's say, instead of doing all of this within a Jupyter notebook, we wanted to run all of this data cleaning within a script, we ought to write functions to do this (something I <em>definitely</em> didn't do in grad school), so let's do that right now. This also can be used on the command line via click (which I've added to <code>redissertation/data.py</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
 
 
