@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+    <link id="dark-theme-style" rel="stylesheet" type="text/css"
+          media="(prefers-color-scheme: dark), (prefers-color-scheme: no-preference)"
+    href="/theme/stylesheet/dark-theme.min.css">
+
+    <link id="pygments-dark-theme" rel="stylesheet" type="text/css"
+              media="(prefers-color-scheme: dark), (prefers-color-scheme: no-preference)"
+          href="/theme/pygments/monokai.min.css">
+    <link id="pygments-light-theme" rel="stylesheet" type="text/css"
+              media="(prefers-color-scheme: light)"
+          href="/theme/pygments/emacs.min.css">
+
+
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="mogismog Atom">
+
+
+    <link rel="shortcut icon" href="http://localhost:8000/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="http://localhost:8000/images/favicon.ico" type="image/x-icon">
+
+
+
+<meta name="author" content="fma" />
+<meta name="description" content="What if I were able to apply what I&#39;ve learned in 5+ years in industry to my dissertation research?" />
+<meta name="keywords" content="python, weather">
+
+
+<meta property="og:site_name" content="mogismog"/>
+<meta property="og:title" content="Retrospective Dissertation - Part 1: Introduction"/>
+<meta property="og:description" content="What if I were able to apply what I&#39;ve learned in 5+ years in industry to my dissertation research?"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/retro-diss-part-1.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-07-05 00:00:00-07:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/fma.html">
+<meta property="article:section" content="retrodiss"/>
+<meta property="article:tag" content="python"/>
+<meta property="article:tag" content="weather"/>
+<meta property="og:image" content="http://localhost:8000/images/profile.jpg">
+
+  <title>mogismog &ndash; Retrospective Dissertation - Part 1: Introduction</title>
+
+</head>
+<body >
+  <aside>
+    <div>
+      <a href="">
+        <img src="http://localhost:8000/images/profile.jpg" alt="mogismog" title="mogismog">
+      </a>
+
+      <h1>
+        <a href="">mogismog</a>
+      </h1>
+
+
+
+      <nav>
+        <ul class="list">
+
+
+
+            <li>
+              <a target="_self" href="https://github.com/mogismog" >About</a>
+            </li>
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/frankalvarez?lang=en" target="_blank">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mogismog" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-linkedin" href="https://www.linkedin.com/in/frankmalvarez/" target="_blank">
+              <i class="fab fa-linkedin"></i>
+            </a>
+          </li>
+      </ul>
+    </div>
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="retro-diss-part-1">Retrospective Dissertation - Part 1: Introduction</h1>
+    <p>
+      Posted on Sun 05 July 2020 in <a href="/category/retrodiss.html">retrodiss</a>
+
+    </p>
+  </header>
+
+
+  <div>
+    <h2>0. Introduction</h2>
+<p>By chance, I happened to stumble across some Python code I wrote back some time
+around 2012-2013. It was related to my dissertation research involving probabilistic
+forecasting of tornadic activity up to 10 days in advance. I remember setting up
+scripts that generated the predictions and sending it off to NOAA/ESRL, where they
+ran for over three years as part of an experimental product.</p>
+<p>There were some interesting, uh, quirks to that code. I had programmed
+mostly in Fortran 77/90 up to that point. It was suggested to me by
+my graduate school mentor to learn Python, and I definitely did a great job
+programing Fortran in Python. Some other cringe-worthy parts of the code
+include:</p>
+<ul>
+<li>Non-descriptive variable names, which I likely inherited from the F77 code
+my advisor provided me.</li>
+<li>Not a lot of documentation, either in-line comments or for the functions
+themselves. Combined with the non-descriptive variable names, this makes it
+really difficult to figure out what the hell is going on (and this is <em>my</em> research).</li>
+<li>I didn't write any tests, and honestly I had no idea that one could write
+tests for code back then.</li>
+<li>Loops... lots and lots and <em>lots</em> of loops, despite using <code>numpy</code> and having
+vectorized computation being an option.</li>
+</ul>
+<p>It's been at least six years since I wrote some of that code. Since then, I've worked
+in tech as a research meteorologist, quantiative researcher, tech/team lead, and research scientist. I've
+learned a whole lot from some very amazing colleagues about writing Python, statistics
+and machine learning, how to approach data science projects, reproducibility,
+version control (!!!), and making the transition from data science research
+to production-based systems. It got me thinking...</p>
+<p>...knowing what I know now, how would I tackle the research problem my dissertation
+research was based on?</p>
+<h2>1. Oh God, Why?</h2>
+<p>I'll admit, this sounds a whole hell of a lot more sadistic than ambitious. Graduate
+school is rarely a good time for anyone, as any statistic about the impact on one's
+mental health during grad school will show. I was no different, and the impacts
+still affect me to this day.</p>
+<p>However, there are three important reason to me to go through this exercise:</p>
+<ul>
+<li>I'm a huge proponent of open science, and I've long felt that I have
+done myself and the field a disservice by not having more of this out in the open.</li>
+<li>I've been <em>very</em> fortunate to have a lot of great mentors and colleagues over
+the years. Not everyone is as fortunate, so I'm hoping I can pass along and share
+the amazing advice, wisdom, and experiences to others.</li>
+<li>It's important for my mental health to recognize how far I've come since
+graduate school. For a long time, I let the habits, fears, and insecurities from
+graduate school define me (e.g. no work-life balance, imposter syndrome, etc.). I'm
+considering this a kind of exorcising of my grad school demons.</li>
+</ul>
+<h2>2. What Will We Be Doing?</h2>
+<p>Specifically, we will work towards generating skillful probabilistic predictions
+of tornadic activity within a specific radius of a point roughly five days in
+advance. We will be collecting/cleaning/aggregating data, performing exploratory
+data analysis, engineering features, developing and evaluating model performance. What I <strong>won't</strong> be doing is re-writing my entire dissertation (lol).</p>
+<p>Given the nature of this problem, it's important to make note of
+what this is and isn't:</p>
+<ul>
+<li>This <strong>IS</strong> a retrospective investigation, so while the end goal is to develop
+a model with predictive skill...</li>
+<li>This <strong>IS NOT</strong> a forecast product! You should always refer to the Storm Prediction
+Center and your local National Weather Service office for <em>actual</em> forecasts of severe weather.</li>
+<li>No, seriously, <strong>THESE AREN'T FORECASTS, DON'T USE THEM AS SUCH!</strong></li>
+</ul>
+<h2>3. Tools We'll Be Using</h2>
+<p>We are going to be using two main datasets:</p>
+<ul>
+<li>
+<p><strong>GEFS Reforecast Dataset</strong>: Reforecasts are retrospective weather forecasts
+that use a "frozen" numerical weather prediction (NWP) model. Using the same parameterizations and
+data assimilation methods, this keeps the systematic biases from the NWP model the
+same across the entire dataset. With a large enough number of these retrospective
+forecasts, we have a better chance of sampling less common events.</p>
+</li>
+<li>
+<p><strong>SPC Tornado Reports</strong>: The Storm Prediction Center (SPC) provides information about
+severe weather events in the form of "storm reports." These reports mostly require
+volunteer reports (especially in the case of severe hail and wind events), but
+also come in the form of damage surveys after severe weather events.</p>
+</li>
+</ul>
+<p>The exploratory data analysis, feature engineering, and model development
+will all be done in Python, with Jupyter notebooks provided in the associated
+GitHub repo.</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/weather.html">weather</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>
+Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+  <span class="footer-separator">|</span>
+  Switch to the <a href="javascript:void(0)" onclick="theme.switch(`dark`)">dark</a> | <a href="javascript:void(0)" onclick="theme.switch(`light`)">light</a> | <a href="javascript:void(0)" onclick="theme.switch(`browser`)">browser</a> theme
+  <script id="dark-theme-script"
+          src="/theme/dark-theme/dark-theme.min.js"
+          data-enable-auto-detect-theme="True"
+          data-default-theme="dark"
+          type="text/javascript">
+  </script>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " mogismog ",
+  "url" : "",
+  "image": "http://localhost:8000/images/profile.jpg",
+  "description": "Neverending Side Projects & Thoughts"
+}
+</script>
+
+
+</body>
+</html>

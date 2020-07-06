@@ -1,0 +1,516 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+    <link id="dark-theme-style" rel="stylesheet" type="text/css"
+          media="(prefers-color-scheme: dark), (prefers-color-scheme: no-preference)"
+    href="/theme/stylesheet/dark-theme.min.css">
+
+    <link id="pygments-dark-theme" rel="stylesheet" type="text/css"
+              media="(prefers-color-scheme: dark), (prefers-color-scheme: no-preference)"
+          href="/theme/pygments/monokai.min.css">
+    <link id="pygments-light-theme" rel="stylesheet" type="text/css"
+              media="(prefers-color-scheme: light)"
+          href="/theme/pygments/emacs.min.css">
+
+
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="mogismog Atom">
+
+
+    <link rel="shortcut icon" href="http://localhost:8000/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="http://localhost:8000/images/favicon.ico" type="image/x-icon">
+
+
+
+<meta name="author" content="fma" />
+<meta name="description" content="Exploring The Storm Prediction Center&#39;s Tornado Reports Database" />
+<meta name="keywords" content="python, weather">
+
+
+<meta property="og:site_name" content="mogismog"/>
+<meta property="og:title" content="Retrospective Dissertation - Part 2: Tornado Reports"/>
+<meta property="og:description" content="Exploring The Storm Prediction Center&#39;s Tornado Reports Database"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/retro-diss-part-2.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-07-06 00:00:00-07:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/fma.html">
+<meta property="article:section" content="retrodiss"/>
+<meta property="article:tag" content="python"/>
+<meta property="article:tag" content="weather"/>
+<meta property="og:image" content="http://localhost:8000/images/profile.jpg">
+
+  <title>mogismog &ndash; Retrospective Dissertation - Part 2: Tornado Reports</title>
+
+</head>
+<body >
+  <aside>
+    <div>
+      <a href="">
+        <img src="http://localhost:8000/images/profile.jpg" alt="mogismog" title="mogismog">
+      </a>
+
+      <h1>
+        <a href="">mogismog</a>
+      </h1>
+
+
+
+      <nav>
+        <ul class="list">
+
+
+
+            <li>
+              <a target="_self" href="https://github.com/mogismog" >About</a>
+            </li>
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/frankalvarez?lang=en" target="_blank">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mogismog" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-linkedin" href="https://www.linkedin.com/in/frankmalvarez/" target="_blank">
+              <i class="fab fa-linkedin"></i>
+            </a>
+          </li>
+      </ul>
+    </div>
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="retro-diss-part-2">Retrospective Dissertation - Part 2: Tornado Reports</h1>
+    <p>
+      Posted on Mon 06 July 2020 in <a href="/category/retrodiss.html">retrodiss</a>
+
+    </p>
+  </header>
+
+
+  <div>
+    <h1>Retrospective Dissertation Part 2: Exploring Tornado Reports</h1>
+<p><em>In <a href="some_link">Part 1</a> of Retrospective Dissertation, we went over the data science problem we'll be tackling and why I'm masochistic enough to go through dissertation research again. In Part 2, we'll go over exploring the tornado report dataset from the Storm Prediction Center. This will be used to generate labels for our prediction model.</em></p>
+<p>http://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf
+The <a href="http://www.spc.noaa.gov">Storm Prediction Center (SPC)</a> provides both excellent severe weather forecasts and datasets of historical severe weather events. Their <a href="http://www.spc.noaa.gov/wcm/#data">severe weather database files</a> have observed severe weather reports dating back to 1950 for hail, wind, and tornado events, though we'll only be focusing on the tornado reports. There are some big caveats and limitations that come with the tornado reports dataset that we'll get into in this post, but it's a great public dataset that is constantly being updated.</p>
+<h2>0. Getting the Data</h2>
+<p>We want to use the csv file that represents "actual" tornado tracks, which provides single connected tracks as observations (as opposed to individual state reports). From the looks of it, the "actual" tornado reports dataset is still preliminary for 2017, so we'll keep that in mind. The csv file can be found <a href="http://www.spc.noaa.gov/wcm/data/1950-2017_actual_tornadoes_prelim.csv">at this link</a> with headers included. That said, some of the column names aren't particularly descriptive, nor will we be using all of the columns. A <a href="http://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf">document provided by SPC</a> gives us information about what each column represents, so we'll be renaming and using the following columns:</p>
+<ul>
+<li><code>yr</code> -&gt; <code>observation_year</code>: The year the observed tornado occurred.</li>
+<li><code>mo</code> -&gt; <code>observation_month</code>: The month the observed tornado occurred.</li>
+<li><code>dy</code> -&gt; <code>observation_day</code>: The day of the month the observed tornado occurred.</li>
+<li><code>tz</code> -&gt; <code>timezone</code>: The timezone for the observation date and time. The format doc from SPC says all observation dates and times (with the exception of unknown and GMT/UTC reports) have been converted to CST.</li>
+<li><code>st</code> -&gt; <code>observation_state</code>: The state in which the observed tornado occurred.</li>
+<li><code>mag</code> -&gt; <code>f_or_ef_scale</code>: The Fujita (F) or Enhanced Fujita (EF) scale magnitude of the tornado. This ranges from 0-5, with the EF scale applied to tornadoes after January 2007. Unknown F/EF scale values are marked as -9.</li>
+<li><code>slat</code> -&gt; <code>starting_latitude_deg</code>: The starting latitude (in degrees) of the tornado track.</li>
+<li><code>slon</code> -&gt; <code>starting_longitude_deg</code>: The starting longitude (in degrees) of the tornado track.</li>
+<li><code>elat</code> -&gt; <code>ending_latitude_deg</code>: The ending latitude (in degrees) of the tornado track.</li>
+<li><code>elon</code> -&gt; <code>ending_longitude_deg</code>: The ending longitude (in degrees) of the tornado track.</li>
+</ul>
+<p>We'll be using <code>pandas</code> to get the tornado reports csv off of SPC's website, and will also be using the <code>date</code> and <code>time</code> columns to create a column of datetime objects:</p>
+<div class="highlight"><pre><span></span><code><span class="n">rename_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;yr&#39;</span><span class="p">:</span> <span class="s1">&#39;observation_year&#39;</span><span class="p">,</span> <span class="s1">&#39;mo&#39;</span><span class="p">:</span> <span class="s1">&#39;observation_month&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;dy&#39;</span><span class="p">:</span> <span class="s1">&#39;observation_date&#39;</span><span class="p">,</span> <span class="s1">&#39;tz&#39;</span><span class="p">:</span> <span class="s1">&#39;timezone&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;st&#39;</span><span class="p">:</span> <span class="s1">&#39;observation_state&#39;</span><span class="p">,</span> <span class="s1">&#39;mag&#39;</span><span class="p">:</span> <span class="s1">&#39;f_or_ef_scale&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;slat&#39;</span><span class="p">:</span> <span class="s1">&#39;starting_latitude_deg&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;slon&#39;</span><span class="p">:</span> <span class="s1">&#39;starting_longitude_deg&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;elat&#39;</span><span class="p">:</span> <span class="s1">&#39;ending_latitude_deg&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;elon&#39;</span><span class="p">:</span> <span class="s1">&#39;ending_longitude_deg&#39;</span><span class="p">}</span>
+
+<span class="n">spc_tornado_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.spc.noaa.gov/wcm/data/1950-2018_actual_tornadoes.csv&quot;</span>
+<span class="n">tornado_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">spc_tornado_url</span><span class="p">,</span>
+                          <span class="n">parse_dates</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;observation_datetime&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">]})</span>
+                <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_dict</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="nb">list</span><span class="p">(</span><span class="n">rename_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;observation_datetime&#39;</span><span class="p">,]])</span>
+</code></pre></div>
+
+
+<p>Ideally, we'd want our data in "tidy" format (which Tom Augspurger <a href="https://tomaugspurger.github.io/modern-5-tidy.html">gives a great example</a> of using <code>pandas</code> and tidy data), which is when our data meets the following criteria (per definition from <a href="http://www.jstatsoft.org/v59/i10/paper">Hadley Wickham</a>):</p>
+<ol>
+<li>Each variable in our dataset forms a column.</li>
+<li>Each observation forms a row.</li>
+<li>Each type of observational unit forms a table.</li>
+</ol>
+<p>Since we're only working with one kind of observational unit (tornado report), we can focus on the first two criteria. Looking at the first few rows shows our data is, in fact, in tidy format:</p>
+<div class="highlight"><pre><span></span><code><span class="n">tornado_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div>
+
+
+<div class="highlight"><pre><span></span><code>   <span class="n">observation_year</span>  <span class="n">observation_month</span>  <span class="n">observation_date</span>  <span class="n">timezone</span>  \
+<span class="mi">0</span>              <span class="mi">1950</span>                  <span class="mi">1</span>                 <span class="mi">3</span>         <span class="mi">3</span>   
+<span class="mi">1</span>              <span class="mi">1950</span>                  <span class="mi">1</span>                 <span class="mi">3</span>         <span class="mi">3</span>   
+<span class="mi">2</span>              <span class="mi">1950</span>                  <span class="mi">1</span>                 <span class="mi">3</span>         <span class="mi">3</span>   
+<span class="mi">3</span>              <span class="mi">1950</span>                  <span class="mi">1</span>                <span class="mi">13</span>         <span class="mi">3</span>   
+<span class="mi">4</span>              <span class="mi">1950</span>                  <span class="mi">1</span>                <span class="mi">25</span>         <span class="mi">3</span>   
+
+  <span class="n">observation_state</span>  <span class="n">f_or_ef_scale</span>  <span class="n">starting_latitude_deg</span>  \
+<span class="mi">0</span>                <span class="n">MO</span>              <span class="mi">3</span>                  <span class="mf">38.77</span>   
+<span class="mi">1</span>                <span class="n">IL</span>              <span class="mi">3</span>                  <span class="mf">39.10</span>   
+<span class="mi">2</span>                <span class="n">OH</span>              <span class="mi">1</span>                  <span class="mf">40.88</span>   
+<span class="mi">3</span>                <span class="n">AR</span>              <span class="mi">3</span>                  <span class="mf">34.40</span>   
+<span class="mi">4</span>                <span class="n">MO</span>              <span class="mi">2</span>                  <span class="mf">37.60</span>   
+
+   <span class="n">starting_longitude_deg</span>  <span class="n">ending_latitude_deg</span>  <span class="n">ending_longitude_deg</span>  \
+<span class="mi">0</span>                  <span class="o">-</span><span class="mf">90.22</span>                <span class="mf">38.83</span>                <span class="o">-</span><span class="mf">90.03</span>   
+<span class="mi">1</span>                  <span class="o">-</span><span class="mf">89.30</span>                <span class="mf">39.12</span>                <span class="o">-</span><span class="mf">89.23</span>   
+<span class="mi">2</span>                  <span class="o">-</span><span class="mf">84.58</span>                 <span class="mf">0.00</span>                  <span class="mf">0.00</span>   
+<span class="mi">3</span>                  <span class="o">-</span><span class="mf">94.37</span>                 <span class="mf">0.00</span>                  <span class="mf">0.00</span>   
+<span class="mi">4</span>                  <span class="o">-</span><span class="mf">90.68</span>                <span class="mf">37.63</span>                <span class="o">-</span><span class="mf">90.65</span>   
+
+  <span class="n">observation_datetime</span> <span class="n">observation_valid_time</span>  
+<span class="mi">0</span>  <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">03</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>    <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">04</span> <span class="mi">12</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  
+<span class="mi">1</span>  <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">03</span> <span class="mi">11</span><span class="p">:</span><span class="mi">55</span><span class="p">:</span><span class="mi">00</span>    <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">04</span> <span class="mi">12</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  
+<span class="mi">2</span>  <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">03</span> <span class="mi">16</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>    <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">04</span> <span class="mi">12</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  
+<span class="mi">3</span>  <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">13</span> <span class="mi">05</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">00</span>    <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">13</span> <span class="mi">12</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  
+<span class="mi">4</span>  <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">25</span> <span class="mi">19</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">00</span>    <span class="mi">1950</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">26</span> <span class="mi">12</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+</code></pre></div>
+
+
+<h2>1. Cleaning Our Data</h2>
+<h3>Unknown/non-CST timezones</h3>
+<p>The SPC data format doc said mentioned some things to look out for in a few of the columns, so we should make sure we account for that. First, we'll see how many different timezones we have in our dataset. A quick group-by operation shows we have 37 reports that aren't in CST (identified as <code>3</code>). There are so few that aren't that we can just filter them out:</p>
+<div class="highlight"><pre><span></span><code><span class="n">tornado_df</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</code></pre></div>
+
+
+<table>
+<thead>
+<tr>
+<th>timezone</th>
+<th>num_reports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>63608</td>
+</tr>
+<tr>
+<td>6</td>
+<td>28</td>
+</tr>
+<tr>
+<td>0</td>
+<td>8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">tornado_df</span> <span class="o">=</span> <span class="n">tornado_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tornado_df</span><span class="o">.</span><span class="n">timezone</span> <span class="o">==</span> <span class="mi">3</span><span class="p">]</span>
+</code></pre></div>
+
+
+<h3>Unknown F/EF scale</h3>
+<p>The SPC documentation says -9 represents an "unknown" E/F Scale value. It looks like these values are in 2016, 2017, and 2018, which makes sense since those are possibly preliminary. Given there are only 111 of these observations, we'll just filter them out:</p>
+<div class="highlight"><pre><span></span><code><span class="n">tornado_df</span><span class="o">.</span><span class="n">f_or_ef_scale</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</code></pre></div>
+
+
+<table>
+<thead>
+<tr>
+<th>F/EF Scale</th>
+<th>Number of Reports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>29712</td>
+</tr>
+<tr>
+<td>1</td>
+<td>21522</td>
+</tr>
+<tr>
+<td>2</td>
+<td>9208</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2464</td>
+</tr>
+<tr>
+<td>4</td>
+<td>569</td>
+</tr>
+<tr>
+<td>-9</td>
+<td>111</td>
+</tr>
+<tr>
+<td>5</td>
+<td>59</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">tornado_df</span> <span class="o">=</span> <span class="n">tornado_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tornado_df</span><span class="o">.</span><span class="n">f_or_ef_scale</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">9</span><span class="p">]</span>
+</code></pre></div>
+
+
+<h2>2. Creating a "valid time" for each observation</h2>
+<p>As describe in the introductory post, we will be following SPC standards and create a model that predicts tornadic activity within a 12 UTC - 12 UTC time range. We'll refer to this as the "valid" time of our predictions/observations. However, our observation timestamps are all in the CST time zone, which is six hours <em>behind</em> UTC time. We'll need to do two thing:</p>
+<ol>
+<li>Convert our observations from CST to UTC.</li>
+<li>Assign each observation to the correct "valid" time.</li>
+</ol>
+<p>The first part is easy enough, as we can just tack on six hours to our observation date/time stamps. To associate each observation with the correct valid time, we will use the following logic:</p>
+<ul>
+<li>Round each observation's date/timestamp up to the nearest 12th hour increment of each day.</li>
+<li>Any observation whose rounded timestamp has an hour equal to 0 will have 12 hours added on to the rounded timestamp.</li>
+</ul>
+<p><code>pandas</code> makes this operation super easy by incorporating <code>round</code>, <code>floor</code>, and <code>ceil</code> operations onto the timestamp objects:</p>
+<div class="highlight"><pre><span></span><code><span class="n">tornado_df</span> <span class="o">=</span> <span class="n">tornado_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">observation_valid_time</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">observation_datetime</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;6H&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="s1">&#39;12H&#39;</span><span class="p">))</span>
+
+<span class="n">tornado_df</span> <span class="o">=</span> <span class="n">tornado_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">observation_valid_time</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">observation_valid_time</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">observation_valid_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">observation_valid_time</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;12H&#39;</span><span class="p">)))</span>
+</code></pre></div>
+
+
+<table>
+<thead>
+<tr>
+<th>observation_datetime</th>
+<th>observation_valid_time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2018-12-20 11:28:00</td>
+<td>2018-12-21 12:00:00</td>
+</tr>
+<tr>
+<td>2018-12-20 16:10:00</td>
+<td>2018-12-21 12:00:00</td>
+</tr>
+<tr>
+<td>2018-12-26 15:40:00</td>
+<td>2018-12-27 12:00:00</td>
+</tr>
+<tr>
+<td>2018-12-26 16:23:00</td>
+<td>2018-12-27 12:00:00</td>
+</tr>
+<tr>
+<td>2018-12-27 06:12:00</td>
+<td>2018-12-28 12:00:00</td>
+</tr>
+<tr>
+<td>2018-12-27 10:15:00</td>
+<td>2018-12-28 12:00:00</td>
+</tr>
+<tr>
+<td>2018-12-27 10:29:00</td>
+<td>2018-12-28 12:00:00</td>
+</tr>
+<tr>
+<td>2018-12-31 12:35:00</td>
+<td>2019-01-01 12:00:00</td>
+</tr>
+<tr>
+<td>2018-12-31 13:43:00</td>
+<td>2019-01-01 12:00:00</td>
+</tr>
+<tr>
+<td>2018-12-31 14:38:00</td>
+<td>2019-01-01 12:00:00</td>
+</tr>
+</tbody>
+</table>
+<h2>2. Exploring characteristics of the data</h2>
+<h3>Spurrious Yearly Tornado Trends</h3>
+<p>Now that we've cleaned our data, we can start doing some exploratory data analysis. Since this dataset goes back to 1950, we may be interested in the number of tornado reports per year and how that's changed over time. We'll group by the <code>observation_year</code> column and count the number of observations within each year, and use <code>seaborn</code> to plot out the data with a trendline:</p>
+<div class="highlight"><pre><span></span><code><span class="n">yearly_counts</span> <span class="o">=</span> <span class="p">(</span><span class="n">tornado_df</span><span class="o">.</span><span class="n">observation_year</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;observation_year&#39;</span><span class="p">:</span> <span class="s1">&#39;number_of_reported_tornadoes&#39;</span><span class="p">}))</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lmplot</span><span class="p">(</span><span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;number_of_reported_tornadoes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">yearly_counts</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">g</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Number of Reported Tornadoes Per Year, 1950-2018&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Number of Reported Tornadoes&#39;</span><span class="p">);</span>
+</code></pre></div>
+
+
+<p><img alt="Yearly reported tornadoes, 1950-2018" src="images/retro-diss/num_tors_1950-2018.png"></p>
+<p>Looking at this plot, it sure looks like the total number of tornadoes per year have been increasing since 1950! That's a really interesting find, let's see if the same holds true for the number of tornadoes per year for each F/EF scale value:</p>
+<div class="highlight"><pre><span></span><code><span class="n">yearly_ef_tornado_count</span> <span class="o">=</span> <span class="p">(</span><span class="n">tornado_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;observation_year&#39;</span><span class="p">,</span> <span class="s1">&#39;f_or_ef_scale&#39;</span><span class="p">])</span>
+                                  <span class="o">.</span><span class="n">observation_valid_time</span>
+                                  <span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">&#39;count&#39;</span><span class="p">])</span>
+                                  <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                                  <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="s1">&#39;number_of_reported_tornadoes&#39;</span><span class="p">}))</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lmplot</span><span class="p">(</span><span class="s1">&#39;observation_year&#39;</span><span class="p">,</span> <span class="s1">&#39;number_of_reported_tornadoes&#39;</span><span class="p">,</span>
+           <span class="n">hue</span><span class="o">=</span><span class="s1">&#39;f_or_ef_scale&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">yearly_ef_tornado_count</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">g</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Number of Reported Tornadoes Per Year by F/EF Scale, 1950-2018&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Number of Reported Tornadoes&#39;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Year&#39;</span><span class="p">);</span>
+</code></pre></div>
+
+
+<p><img alt="Yearly reported tornadoes by F/EF Category, 1950-2018" src="images/retro-diss/num_tors_by_ef_category_1950-2018.png"></p>
+<p>The above plot shows a flat trend for E/F 3, 4, and 5 tornadoes, a decreasing trend for E/F 2 tornadoes, a modest increasing trend for E/F 1 tornadoes, and an insane increasing trend for E/F 0 tornadoes. The specific datapoints on the plot show that this upward trend began around 1990, so what's the deal?</p>
+<p>There's been some great research done on the topic of the quality of this historical tornado reports dataset, all of which I can't do justice to in this post. I'll attempt to summarize the causes of this spurrious trend described in greater detail in <a href="https://journals.ametsoc.org/doi/10.1175/WAF910.1#">Doswell and Burgess (1988)</a>, <a href="https://journals.ametsoc.org/doi/10.1175/WAF910.1#">Grazulis 1993</a>, <a href="https://journals.ametsoc.org/doi/10.1175/WAF910.1#">Brooks and Doswell (2001)</a>, and <a href="https://journals.ametsoc.org/doi/10.1175/WAF910.1">Verbout 2005</a>:</p>
+<ul>
+<li>As the population increases and people move into formerly unpopulated regions, the number of tornadoes that occurred <em>and</em> were observed has increased.</li>
+<li>The popularity of storm chasing and the creation of storm spotting training sessions and network has likely resulted in an increase in tornado reporting.</li>
+<li>The NEXRAD Doppler radar network from NOAA has allowed for weaker tornado velocity signatures to be identified.</li>
+</ul>
+<p>If we plot the timeseries of yearly tornadoes for each E/F Scale value from 1980 and also when the first Doppler radar was installed, we confirm that almost all of the upward trend of tornado reports is due to these E/F 0 reports:</p>
+<div class="highlight"><pre><span></span><code><span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="n">ef_tornado_count_since_1980</span> <span class="o">=</span> <span class="n">yearly_ef_tornado_count</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">yearly_ef_tornado_count</span><span class="o">.</span><span class="n">observation_year</span> <span class="o">&gt;=</span> <span class="mi">1980</span><span class="p">]</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">f_or_ef_scale</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">f_or_ef_scale</span><span class="p">))</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="s1">&#39;observation_year&#39;</span><span class="p">,</span> <span class="s1">&#39;number_of_reported_tornadoes&#39;</span><span class="p">,</span>
+                 <span class="n">hue</span><span class="o">=</span><span class="s1">&#39;f_or_ef_scale&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ef_tornado_count_since_1980</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1990</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1500</span><span class="p">,</span> <span class="mi">150</span><span class="p">),</span> <span class="s1">&#39;--k&#39;</span><span class="p">);</span>
+</code></pre></div>
+
+
+<p><img alt="Yearly reported tornadoes by F/EF Category, 1950-2018" src="images/retro-diss/num_tors_by_ef_category_ts_1980-2018.png"></p>
+<p>We have two options to account for this, neither of which is ideal:</p>
+<ol>
+<li>Keep only E/F 1 and greater tornadoes,</li>
+<li>Keep all tornadoes regardless of E/F scale, but only use data from 1990 to present.</li>
+</ol>
+<p>We already have so few reports that it may be a bad idea to throw out all F/EF 0 tornadoes. That said, there may not be good signal for weaker tornadoes. As such, I ended up taking the first approach in my dissertation research. But, for funsies, we'll go ahead and take a mix of the two approaches: We'll only keep F/EF 1 and greater tornadoes <em>and</em> only use data from 1990 on:</p>
+<div class="highlight"><pre><span></span><code><span class="n">tornado_df</span> <span class="o">=</span> <span class="n">tornado_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">tornado_df</span><span class="o">.</span><span class="n">observation_year</span> <span class="o">&gt;=</span> <span class="mi">1990</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tornado_df</span><span class="o">.</span><span class="n">f_or_ef_scale</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)]</span>
+</code></pre></div>
+
+
+<p>Now, let's save this file as a csv and call it a day!</p>
+<div class="highlight"><pre><span></span><code><span class="n">tornado_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;../data/cleaned_tornado_reports.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Great, we now have a (relatively) cleaned dataset of tornado reports! Let's say, instead of doing all of this within a Jupyter notebook, we wanted to run all of this data cleaning within a script, we ought to write functions to do this (something I <em>definitely</em> didn't do in grad school), so let's do that right now. This also can be used on the command line via click (which I've added to <code>redissertation/data.py</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+
+
+<span class="n">SPC_REPORT_RENAME_DICT</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;yr&#39;</span><span class="p">:</span> <span class="s1">&#39;observation_year&#39;</span><span class="p">,</span> <span class="s1">&#39;mo&#39;</span><span class="p">:</span> <span class="s1">&#39;observation_month&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;dy&#39;</span><span class="p">:</span> <span class="s1">&#39;observation_date&#39;</span><span class="p">,</span> <span class="s1">&#39;tz&#39;</span><span class="p">:</span> <span class="s1">&#39;timezone&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;st&#39;</span><span class="p">:</span> <span class="s1">&#39;observation_state&#39;</span><span class="p">,</span> <span class="s1">&#39;mag&#39;</span><span class="p">:</span> <span class="s1">&#39;f_or_ef_scale&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;slat&#39;</span><span class="p">:</span> <span class="s1">&#39;starting_latitude_deg&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;slon&#39;</span><span class="p">:</span> <span class="s1">&#39;starting_longitude_deg&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;elat&#39;</span><span class="p">:</span> <span class="s1">&#39;ending_latitude_deg&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;elon&#39;</span><span class="p">:</span> <span class="s1">&#39;ending_longitude_deg&#39;</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">get_tornado_reports</span><span class="p">(</span><span class="n">url_or_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">date_and_time_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">],</span>
+                        <span class="n">column_rename_and_keep_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="n">SPC_REPORT_RENAME_DICT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get and preprocess SPC tornado reports data.&quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url_or_path</span><span class="p">,</span>
+                      <span class="n">parse_dates</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;observation_datetime&#39;</span><span class="p">:</span> <span class="n">date_and_time_columns</span><span class="p">})</span>
+            <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">column_rename_and_keep_dict</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="nb">list</span><span class="p">(</span><span class="n">column_rename_and_keep_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;observation_datetime&#39;</span><span class="p">,]])</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="k">def</span> <span class="nf">drop_unknown_f_or_ef_scales</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">f_or_ef_scale_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unknown_scale_id</span><span class="p">:</span> <span class="nb">int</span><span class="o">=-</span><span class="mi">9</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Drop observations with unknown E/F Scale values.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">f_or_ef_scale_column</span><span class="p">]</span> <span class="o">!=</span> <span class="n">unknown_scale_id</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">filter_by_year</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">earliest_year_for_obs</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Filter tornado reports data based on some start year.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span> <span class="o">&gt;=</span> <span class="n">earliest_year_for_obs</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">find_valid_time</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">observation_time_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">valid_time_column</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;observation_valid_time&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Match up observed tornadoes with a valid time (12z-12z).</span>
+
+<span class="sd">    Create the valid times of the reports, e.g. the &quot;day&quot; to which</span>
+<span class="sd">    they are associated. We consider the &quot;valid time&quot; to be the</span>
+<span class="sd">    ending time of a 24 hour forecast period. For example, a tornado</span>
+<span class="sd">    occurring at 2016-05-18 05:00Z would have a valid time of</span>
+<span class="sd">    2016-05-18 12:00Z, and a tornado occurring at 2016-05-18 15:00Z</span>
+<span class="sd">    would have a valid time of 2016-05-19 12:00Z.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">valid_times</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">observation_datetime</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;6H&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="s1">&#39;12H&#39;</span><span class="p">)</span>
+    <span class="n">valid_times</span> <span class="o">=</span> <span class="n">valid_times</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">valid_times</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">valid_times</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;12H&#39;</span><span class="p">))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">valid_time_column</span><span class="p">:</span> <span class="n">valid_times</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="k">def</span> <span class="nf">filter_non_central_time_reports</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timezone_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                    <span class="n">timezone_to_keep</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Filter out tornado reports that weren&#39;t logged in CST.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">timezone_column</span><span class="p">]</span> <span class="o">==</span> <span class="n">timezone_to_keep</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">get_clean_and_save_tornado_reports</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">csv_save_name</span><span class="p">,</span> <span class="n">spc_tor_url</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">get_tornado_reports</span><span class="p">(</span><span class="n">spc_tor_url</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">drop_unknown_f_or_ef_scales</span><span class="p">,</span> <span class="s1">&#39;f_or_ef_scale&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">filter_non_central_time_reports</span><span class="p">,</span> <span class="s1">&#39;timezone&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">filter_by_year</span><span class="p">,</span> <span class="s1">&#39;observation_datetime&#39;</span><span class="p">,</span> <span class="mi">1990</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">find_valid_time</span><span class="p">,</span> <span class="s1">&#39;observation_datetime&#39;</span><span class="p">))</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">csv_save_name</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/weather.html">weather</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>
+Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+  <span class="footer-separator">|</span>
+  Switch to the <a href="javascript:void(0)" onclick="theme.switch(`dark`)">dark</a> | <a href="javascript:void(0)" onclick="theme.switch(`light`)">light</a> | <a href="javascript:void(0)" onclick="theme.switch(`browser`)">browser</a> theme
+  <script id="dark-theme-script"
+          src="/theme/dark-theme/dark-theme.min.js"
+          data-enable-auto-detect-theme="True"
+          data-default-theme="dark"
+          type="text/javascript">
+  </script>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " mogismog ",
+  "url" : "",
+  "image": "http://localhost:8000/images/profile.jpg",
+  "description": "Neverending Side Projects & Thoughts"
+}
+</script>
+
+
+</body>
+</html>
