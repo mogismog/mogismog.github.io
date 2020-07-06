@@ -29,14 +29,58 @@ tests for code back then.
 - Loops... lots and lots and _lots_ of loops, despite using `numpy` and having
 vectorized computation being an option.
 
-It's been at least six years since I wrote some of that code. Since then, I've worked
+Let's look at an example from a function that ran on Python 2.6's `multiprocessing` built-in module. This code did the following:
+
+- Used gridded forecast fields to determine what weather patterns predicted on a certain day were the most similar to what we've seen in the past,
+- Used a gridded tornado observation data set as labels for our post-processing model,
+- Called a FORTRAN 90 submodule (?) using a shared memory array (???) to run these predictions across multiple days at a time.
+
+This is a verbatim copy/paste from the code I found:
+
+```python
+# --- First, let's define the function that will call to our fortran subroutine forthe multiprocessing part...
+def mp_analog(trainField,fcstField,svrField,dateIdxs,fcstIdxs,idxbuffer,members,n_members,iNum,jNum,datenum,dateIdxNum,\
+    fcstnum,startLat,endLat,startLon,endLon,allLats,allLons,window,t_start,t_end,lock,probs): 
+        dum_probs = mp_ra(trainField,fcstField,svrField,dateIdxs,fcstIdxs,idxbuffer,members,n_members,\
+                iNum,jNum,datenum,dateIdxNum,fcstnum,startlat,endlat,startlon,endlon,\
+                    allLats,allLons,window,t_start,t_end)
+        with lock:
+            print "writing process {}".format(os.getpid())
+            probs[int(t_start-1)*n_members*iNum*jNum:int(t_end)*n_members*iNum*jNum] = dum_probs.reshape(-1)
+
+# --- Now, we call another function to do the heavy lifting of the multiprocessing part...
+def analog(trainField,svrField,dateIdxs,fcstIdxs,idxbuffer,members,n_members,iNum,jNum,datenum,dateIdxNum,\
+    fcst_count,startLat,endLat,startLon,endLon,allLats,allLons,window):
+        nproc = mp.cpu_count() # --- Need to find out how many cores we're working with
+        t_nums = np.floor(np.linspace(1,fcst_count,nproc+1)) # --- Basically, the starting/ending index for each job
+        arr = mp.Array('d',fcst_count*n_members*iNum*jNum,lock=True) # --- The eventual array we will be sending into the netCDF4 file
+        processes = [] # --- List of jobs
+        for i in range(nproc):
+            t_start = t_nums[i]
+            t_end = t_nums[i+1]
+            fcstnum = (t_end-t_start)+1
+            print t_start,t_end
+            lock = mp.Lock()
+            p = mp.Process(target=mp_analog,args=(trainField,trainField[t_start-1:t_end,...],svrField,dateIdxs[t_start-1:t_end,...],fcstIdxs[t_start-1:t_end,...],\
+                idxbuffer[t_start-1:t_end],members,n_members,iNum,jNum,datenum,dateIdxNum,\
+                fcstnum,startLat,endLat,startLon,endLon,allLats,allLons,window,t_start,t_end,lock,arr))
+            p.start()
+            processes.append(p)
+        for i in processes:
+            i.join()
+        shared_arr = np.frombuffer(arr.get_obj())
+        shared_arr = shared_arr.reshape(fcst_count,n_members,iNum,jNum)
+        return shared_arr
+```
+
+Like, looking at that code above, how much easier would it have been if things like `xarray` and `dask` existed and, more importantly, I knew how to use them? It's been at least six years since I wrote some of that code. Since then, I've worked
 in tech as a research meteorologist, quantiative researcher, tech/team lead, and research scientist. I've
 learned a whole lot from some very amazing colleagues about writing Python, statistics
 and machine learning, how to approach data science projects, reproducibility,
 version control (!!!), and making the transition from data science research
 to production-based systems. It got me thinking...
 
-...knowing what I know now, how would I tackle the research problem my dissertation
+...knowing what I know now and using tools that currently exist, how would I tackle the research problem my dissertation
 research was based on?
 
 ## 1. Oh God, Why?
