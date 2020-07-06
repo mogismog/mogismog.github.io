@@ -7,8 +7,6 @@ Author: fma
 Summary: Exploring The Storm Prediction Center's Tornado Reports Database
 
 
-# Retrospective Dissertation Part 2: Exploring Tornado Reports
-
 *In [Part 1](some_link) of Retrospective Dissertation, we went over the data science problem we'll be tackling and why I'm masochistic enough to go through dissertation research again. In Part 2, we'll go over exploring the tornado report dataset from the Storm Prediction Center. This will be used to generate labels for our prediction model.*
 
 http://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf

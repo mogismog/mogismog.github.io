@@ -1,5 +1,5 @@
-title: About
-date: 2020-07-01
+Title: About
+Date: 2020-07-01
 
 
 I probably ought to fill this in with more detail, but here's the gist of it:
