@@ -3,8 +3,9 @@
 &lt;h2&gt;0. A Bit of Backstory&lt;/h2&gt;
 &lt;p&gt;Back in 2010, I had finished my master's research on &lt;a href="https://en.wikipedia.org/wiki/Explosive_cyclogenesis"&gt;rapid cyclogenesis&lt;/a&gt; (more commonly known as "bomb" cyclones) within the first version of NOAA's Climate Forecast System (CFSv1). I was excited to be done, and the plan going forward was to continue more in-depth research for my dissertation. I had presented the research at both the American Meteorological Society's and the American Geophysical Union's annual conferences, and it was (mostly) well received, so it made sense to continue the research.&lt;/p&gt;
 &lt;p&gt;In order to be classified as a rapid cyclogenesis event, an extra-tropical cyclone needs to have a decrease in pressure over 24 hours (corrected for latitude):&lt;/p&gt;
-&lt;p&gt;$$\frac{(24 *sin(\phi)/sin(60))mb}{24hr}$$&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{(24 *sin(\phi)/sin(60))mb}{24hr}$$&lt;/div&gt;
 &lt;p&gt;Which means if this value, known as a Bergeron, is &amp;gt;= 1, then it is an explosive cyclogenesis event, and the higher above 1, the more intense the storm. So around August of 2010, I'm looking over my FORTRAN 90 code that processed these events, and that's when I noticed a bug in the code: Some where along the way, probably when I wanted to test something out, I had it hardcoded to exclude any storm that was fewer than 3.5 Bergerons. I removed the filter, reran the code, and not only was I throwing out like 95% of all of the data, I also got much different results than in any of my conference posters/presentations and my thesis. Basically, I invalidated all of my research.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="lol oops" src="images/retro-diss/ralph.gif"&gt;&lt;/p&gt;
 &lt;p&gt;Needless to say, I was distraught and kind of just went through the motions the next few months. I found myself questioning whether I was good enough to even do a PhD, clearly someone smart wouldn't have made this mistake. I let my advisor know how I didn't want to continue on with the research, and that I wasn't sure I wanted to do a PhD. Thankfully, my advisor was (and still is) a really great person, and said that I could switch topics and just hammer out the dissertation research in 3-4 years. He also mentioned that, when he worked at NOAA, he came across a super fascinating concept of generating a ton of retrospective forecasts from the same weather model and building post-processing models from the output. My advisor asked me to write up a 2-3 pager suggesting a research idea that used these retrospective forecasts, and that he would reach out to Tom Hamill at NOAA's Earth Systems Research Laboratory.&lt;/p&gt;
 &lt;p&gt;I wrote up an, uh, interesting idea involving genetic algorithms and precipitation prediction, which I thought was super cool. Tom, who is an absolutely incredible person, was very kind and polite in his response: That's an ok idea, but how about we work on one of these three other ideas that may have more value? One of those ideas was, of course, probabilistic tornado prediction. I decided on that one, and the best decision I could have made was started by one of the worst mistakes I have made.&lt;/p&gt;
 &lt;h2&gt;1. Reforecast Data&lt;/h2&gt;
@@ -182,7 +183,69 @@
 
 &lt;p&gt;Writing the bash script and getting it to work as expected, along with running it on my suddenly struggling MacBook (the one with the black shell!) took about 2-3 months (and probably more time off of my life due to the frustration). I would have used more compute power, but my grad department didn't have a cluster or anything, and I didn't know AWS was a thing (was it a thing back then?). In fact, it even got to the point where Tom suggested I send a cleaned/wiped hard drive that he would load all the data up on and just mail it back (assuming, of course, all of this would be ok with the government's security restrictions).&lt;/p&gt;
 &lt;p&gt;Meanwhile, in 2020, I simply spun up a VM instance on Google Cloud with a bunch of cores and let it run. It took about 3-4 hours to run, which amounted to something like $10-15. Combined with the 30-60 minutes it took to write the script, we're basically looking at 5 hours of time here.&lt;/p&gt;
-&lt;p&gt;Up next, exploratory data analysis and feature engineering!&lt;/p&gt;</content><category term="retrodiss"></category><category term="python"></category><category term="weather"></category></entry><entry><title>Retrospective Dissertation - Part 2: Tornado Reports</title><link href="https://mogismog.github.io/retro-diss-part-2.html" rel="alternate"></link><published>2020-07-06T00:00:00-07:00</published><updated>2020-07-06T00:00:00-07:00</updated><author><name>fma</name></author><id>tag:mogismog.github.io,2020-07-06:/retro-diss-part-2.html</id><summary type="html">&lt;p&gt;Exploring The Storm Prediction Center's Tornado Reports Database&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;em&gt;In &lt;a href="https://mogismog.github.io/retro-diss-part-1.html"&gt;Part 1&lt;/a&gt; of Retrospective Dissertation, we went over the data science problem we'll be tackling and why I'm masochistic enough to go through dissertation research again. In Part 2, we'll go over exploring the tornado report dataset from the Storm Prediction Center. This will be used to generate labels for our prediction model.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Up next, exploratory data analysis and feature engineering!&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="retrodiss"></category><category term="python"></category><category term="weather"></category></entry><entry><title>Retrospective Dissertation - Part 2: Tornado Reports</title><link href="https://mogismog.github.io/retro-diss-part-2.html" rel="alternate"></link><published>2020-07-06T00:00:00-07:00</published><updated>2020-07-06T00:00:00-07:00</updated><author><name>fma</name></author><id>tag:mogismog.github.io,2020-07-06:/retro-diss-part-2.html</id><summary type="html">&lt;p&gt;Exploring The Storm Prediction Center's Tornado Reports Database&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;em&gt;In &lt;a href="https://mogismog.github.io/retro-diss-part-1.html"&gt;Part 1&lt;/a&gt; of Retrospective Dissertation, we went over the data science problem we'll be tackling and why I'm masochistic enough to go through dissertation research again. In Part 2, we'll go over exploring the tornado report dataset from the Storm Prediction Center. This will be used to generate labels for our prediction model.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;The &lt;a href="http://www.spc.noaa.gov"&gt;Storm Prediction Center (SPC)&lt;/a&gt; provides both excellent severe weather forecasts and datasets of historical severe weather events. Their &lt;a href="http://www.spc.noaa.gov/wcm/#data"&gt;severe weather database files&lt;/a&gt; have observed severe weather reports dating back to 1950 for hail, wind, and tornado events, though we'll only be focusing on the tornado reports. There are some big caveats and limitations that come with the tornado reports dataset that we'll get into in this post, but it's a great public dataset that is constantly being updated.&lt;/p&gt;
 &lt;h2&gt;0. Getting the Data&lt;/h2&gt;
 &lt;p&gt;We want to use the csv file that represents "actual" tornado tracks, which provides single connected tracks as observations (as opposed to individual state reports). From the looks of it, the "actual" tornado reports dataset is still preliminary for 2017, so we'll keep that in mind. The csv file can be found &lt;a href="http://www.spc.noaa.gov/wcm/data/1950-2017_actual_tornadoes_prelim.csv"&gt;at this link&lt;/a&gt; with headers included. That said, some of the column names aren't particularly descriptive, nor will we be using all of the columns. A &lt;a href="http://www.spc.noaa.gov/wcm/data/SPC_severe_database_description.pdf"&gt;document provided by SPC&lt;/a&gt; gives us information about what each column represents, so we'll be renaming and using the following columns:&lt;/p&gt;
