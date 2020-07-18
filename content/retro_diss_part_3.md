@@ -2,7 +2,7 @@ Title: Retrospective Dissertation - Part 3: Reforecast Data
 Date: 2020-07-18
 Category: retrodiss
 Tags: python, weather
-Slug: retro-diss-part-2
+Slug: retro-diss-part-3
 Author: fma
 Summary: Getting The GEFS Reforecast Dataset
 
@@ -17,6 +17,9 @@ In order to be classified as a rapid cyclogenesis event, an extra-tropical cyclo
 $$\frac{(24 *sin(\phi)/sin(60))mb}{24hr}$$
 
 Which means if this value, known as a Bergeron, is >= 1, then it is an explosive cyclogenesis event, and the higher above 1, the more intense the storm. So around August of 2010, I'm looking over my FORTRAN 90 code that processed these events, and that's when I noticed a bug in the code: Some where along the way, probably when I wanted to test something out, I had it hardcoded to exclude any storm that was fewer than 3.5 Bergerons. I removed the filter, reran the code, and not only was I throwing out like 95% of all of the data, I also got much different results than in any of my conference posters/presentations and my thesis. Basically, I invalidated all of my research.
+
+![lol oops](images/retro-diss/ralph.gif)
+
 
 Needless to say, I was distraught and kind of just went through the motions the next few months. I found myself questioning whether I was good enough to even do a PhD, clearly someone smart wouldn't have made this mistake. I let my advisor know how I didn't want to continue on with the research, and that I wasn't sure I wanted to do a PhD. Thankfully, my advisor was (and still is) a really great person, and said that I could switch topics and just hammer out the dissertation research in 3-4 years. He also mentioned that, when he worked at NOAA, he came across a super fascinating concept of generating a ton of retrospective forecasts from the same weather model and building post-processing models from the output. My advisor asked me to write up a 2-3 pager suggesting a research idea that used these retrospective forecasts, and that he would reach out to Tom Hamill at NOAA's Earth Systems Research Laboratory.
 
