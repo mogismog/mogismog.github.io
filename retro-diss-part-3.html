@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mogismog.github.io/theme/stylesheet/style.min.css">
+
+    <link id="dark-theme-style" rel="stylesheet" type="text/css"
+          media="(prefers-color-scheme: dark), (prefers-color-scheme: no-preference)"
+    href="https://mogismog.github.io/theme/stylesheet/dark-theme.min.css">
+
+    <link id="pygments-dark-theme" rel="stylesheet" type="text/css"
+              media="(prefers-color-scheme: dark), (prefers-color-scheme: no-preference)"
+          href="https://mogismog.github.io/theme/pygments/monokai.min.css">
+    <link id="pygments-light-theme" rel="stylesheet" type="text/css"
+              media="(prefers-color-scheme: light)"
+          href="https://mogismog.github.io/theme/pygments/emacs.min.css">
+
+
+  <link rel="stylesheet" type="text/css" href="https://mogismog.github.io/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mogismog.github.io/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mogismog.github.io/theme/font-awesome/css/solid.css">
+
+
+    <link href="https://mogismog.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="mogismog Atom">
+
+
+    <link rel="shortcut icon" href="https://mogismog.github.io//images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mogismog.github.io//images/favicon.ico" type="image/x-icon">
+
+
+
+<meta name="author" content="fma" />
+<meta name="description" content="Getting The GEFS Reforecast Dataset" />
+<meta name="keywords" content="python, weather">
+
+
+<meta property="og:site_name" content="mogismog"/>
+<meta property="og:title" content="Retrospective Dissertation - Part 3: Reforecast Data"/>
+<meta property="og:description" content="Getting The GEFS Reforecast Dataset"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="https://mogismog.github.io/retro-diss-part-3.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-07-18 00:00:00-07:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mogismog.github.io/author/fma.html">
+<meta property="article:section" content="retrodiss"/>
+<meta property="article:tag" content="python"/>
+<meta property="article:tag" content="weather"/>
+<meta property="og:image" content="https://mogismog.github.io//images/profile.jpg">
+
+  <title>mogismog &ndash; Retrospective Dissertation - Part 3: Reforecast Data</title>
+
+</head>
+<body >
+  <aside>
+    <div>
+      <a href="https://mogismog.github.io">
+        <img src="https://mogismog.github.io//images/profile.jpg" alt="mogismog" title="mogismog">
+      </a>
+
+      <h1>
+        <a href="https://mogismog.github.io">mogismog</a>
+      </h1>
+
+
+
+      <nav>
+        <ul class="list">
+
+
+              <li>
+                <a target="_self"
+                   href="https://mogismog.github.io/pages/about.html#about">
+                  About
+                </a>
+              </li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/frankalvarez?lang=en" target="_blank">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mogismog" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-linkedin" href="https://www.linkedin.com/in/frankmalvarez/" target="_blank">
+              <i class="fab fa-linkedin"></i>
+            </a>
+          </li>
+      </ul>
+    </div>
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="retro-diss-part-3">Retrospective Dissertation - Part 3: Reforecast Data</h1>
+    <p>
+      Posted on Sat 18 July 2020 in <a href="https://mogismog.github.io/category/retrodiss.html">retrodiss</a>
+
+    </p>
+  </header>
+
+
+  <div>
+    <p><em>In <a href="https://mogismog.github.io/retro-diss-part-2.html">Part 2</a> of Retrospective Dissertation, we downloaded, processed, and explored SPC's tornado reports dataset. In Part 3, we'll introduce the GEFS Reforecast dataset, which we'll use as our features for tornado prediction!</em></p>
+<h2>0. A Bit of Backstory</h2>
+<p>Back in 2010, I had finished my master's research on <a href="https://en.wikipedia.org/wiki/Explosive_cyclogenesis">rapid cyclogenesis</a> (more commonly known as "bomb" cyclones) within the first version of NOAA's Climate Forecast System (CFSv1). I was excited to be done, and the plan going forward was to continue more in-depth research for my dissertation. I had presented the research at both the American Meteorological Society's and the American Geophysical Union's annual conferences, and it was (mostly) well received, so it made sense to continue the research.</p>
+<p>In order to be classified as a rapid cyclogenesis event, an extra-tropical cyclone needs to have a decrease in pressure over 24 hours (corrected for latitude):</p>
+<p>$$\frac{(24 *sin(\phi)/sin(60))mb}{24hr}$$</p>
+<p>Which means if this value, known as a Bergeron, is &gt;= 1, then it is an explosive cyclogenesis event, and the higher above 1, the more intense the storm. So around August of 2010, I'm looking over my FORTRAN 90 code that processed these events, and that's when I noticed a bug in the code: Some where along the way, probably when I wanted to test something out, I had it hardcoded to exclude any storm that was fewer than 3.5 Bergerons. I removed the filter, reran the code, and not only was I throwing out like 95% of all of the data, I also got much different results than in any of my conference posters/presentations and my thesis. Basically, I invalidated all of my research.</p>
+<p>Needless to say, I was distraught and kind of just went through the motions the next few months. I found myself questioning whether I was good enough to even do a PhD, clearly someone smart wouldn't have made this mistake. I let my advisor know how I didn't want to continue on with the research, and that I wasn't sure I wanted to do a PhD. Thankfully, my advisor was (and still is) a really great person, and said that I could switch topics and just hammer out the dissertation research in 3-4 years. He also mentioned that, when he worked at NOAA, he came across a super fascinating concept of generating a ton of retrospective forecasts from the same weather model and building post-processing models from the output. My advisor asked me to write up a 2-3 pager suggesting a research idea that used these retrospective forecasts, and that he would reach out to Tom Hamill at NOAA's Earth Systems Research Laboratory.</p>
+<p>I wrote up an, uh, interesting idea involving genetic algorithms and precipitation prediction, which I thought was super cool. Tom, who is an absolutely incredible person, was very kind and polite in his response: That's an ok idea, but how about we work on one of these three other ideas that may have more value? One of those ideas was, of course, probabilistic tornado prediction. I decided on that one, and the best decision I could have made was started by one of the worst mistakes I have made.</p>
+<h2>1. Reforecast Data</h2>
+<p>But enough backstory, let's talk about the data! So the idea behind reforecasts is that we have high quality reanalysis data (basically, a best guess at the state of the atmosphere based on various observations) and we have high quality numerical weather prediction (NWP) models. If we were to "freeze" the NWP model, so we would use the same data assmiliation and parameterization techniques, we could use the reanalysis data as our initial conditions and generate a large number of historical weather forecasts. This dataset, then, would have the same state-dependent model biases and errors across the entire time series. Having a large sample size allows for the correction of these state-dependent model biases that may have a low signal relative to the noise, while also having a good representation for rare or unusual events, such as heavy precipitation or, I dunno, tornadoes.</p>
+<p>Back in 2011, we used the then <a href="https://psl.noaa.gov/forecasts/reforecast2/">state-of-the-art GEFS Reforecast Version 2</a> dataset, which was great to use but difficult to get. The data was at a 1 degree x 1 degree resolution, was in grib files, and prior to the web app required pulling grib files from an FTP server. I used a bash script and a tool from NOAA called <a href="https://www.cpc.ncep.noaa.gov/products/wesley/wgrib2/"><code>wgrib2</code></a> to select the slices of data I needed within each file, pull it down, and save it to a set of 3, 1TB external hard drives I had bought. It was a different world back then...</p>
+<p>However, it's 2020 (for better and <em>definitely</em> for worse), and that just won't cut it. Tom let me know that there is a 💫awesome brand new reforecast dataset 💫 that is publicly available on AWS! This data is a huge upgrade from the second version, with the spatial resolution around 0.25 degrees (0.5 degrees for upper air data to save space), forecast steps every three hours, and brand new fields that would be useful for severe weather forecasting!!! Additionally, this data begins in 2000, so uh forget everything I had said in the prior post about tornadoes and needing to use only data from 1990, because we are going to use this new data set from here on out.</p>
+<h2>2. Getting The Data</h2>
+<p>As part of NOAA's "big data" initiative, the Reforecast V3 data is located on S3 at <code>s3://noaa-gefs-retrospective/GEFSv12/reforecast</code>. The data is set up in the following way:</p>
+<ul>
+<li>Forecasts were generated every day at 00Z from 2000-01-01 through 2019-12-31</li>
+<li>Forecast data is provided every three hours out to 10 days, and every six hours from 10-16 days.</li>
+<li>The spatial resolution is 0.25-degree lat/lon grid spacing out to 10 days, and 0.5-degree from 10-16 days. An exception is the upper air data (above 700mb), which always has 0.5-degree spatial resolution.</li>
+<li>The current GEFSv12 provides 31 ensemble members (one control and 30 forecasts with small amounts of noise added to the initial conditions), whereas the Reforecast V3 has one control (<code>c0</code>) and four perturbed members (<code>p1</code> through <code>p4</code>).</li>
+<li>Directory structure on S3 follows a <code>YYYY/YYYYMMDD00/member/days/field</code> format, where <code>days</code> is either <code>'Days:1-10'</code> or <code>'Days:10-16'</code>.</li>
+</ul>
+<p>Following my dissertation's research, we'll opt to pull the following fields:</p>
+<ul>
+<li>Convective Available Potential Energy (<code>cape_sfc</code>): Basically the amount of energy available for a statically unstable parcel lifted to a specific level (higher CAPE can lead to more severe thunderstorms).</li>
+<li>Convective Inhibition (<code>cin_sfc</code>): A measure of the energy of negative buoyancy that can prevent rising parcels from reaching the level of free convection.</li>
+<li>0-3 km Storm Relative Helicity (<code>hlcy_hgt</code>): <a href="https://www.spc.noaa.gov/exper/mesoanalysis/help/help_srh1.html">According to SPC</a>, this is a measure of the potential for cyclonic updraft rotation in right-moving supercells.</li>
+<li>950mb and 500mb U/V wind components (<code>vgrd_pres</code> and <code>ugrd_pres</code>): We'll use these to compute 0-6km wind shear, which research has shown to be important for super cell and tornado development.</li>
+<li>Convective precipitation (<code>acpcp_sfc</code>), which we'll use as a feature simply because I used it in my dissertation research as kind of a indicator feature for thunderstorm activity.</li>
+</ul>
+<p>As I mentioned before, I got the old reforecast data through a bash script, which sequentially downloaded daily files for seven different fields (CAPE, CIN, precip, and the u/v wind components). These files were then opened up within Python via <code>pygrib</code>, and I did whatever processing was required. That, uh, was pretty slow.</p>
+<p>As a comparison, I wrote up a script to download the V3 grib files, process them on the fly, save them as individual netCDF files, and then combine all of them into a single netCDF file via <code>xarray</code>.</p>
+<p>You can check out the full script <a href="https://github.com/mogismog/redissertation/blob/master/redissertation/process_reforecast_data.py">here</a>, but for this post we will just look at two of the functions that do the heavy lifting:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">try_to_open_grib_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Try a few different ways to open up a grib file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    path : str</span>
+<span class="sd">        Path pointing to location of grib file</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ds : xr.Dataset</span>
+<span class="sd">        The xarray Dataset that contains information</span>
+<span class="sd">        from the grib file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;cfgrib&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">cfgrib</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">cfgrib</span><span class="o">.</span><span class="n">open_datasets</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">combine_by_coords</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Oh no! There was a problem opening up </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+    <span class="k">return</span> <span class="n">ds</span>
+
+
+<span class="k">def</span> <span class="nf">download_and_process_grib</span><span class="p">(</span><span class="n">s3_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">latitude_bounds</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                              <span class="n">longitude_bounds</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                              <span class="n">forecast_days_bounds</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                              <span class="n">save_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                              <span class="n">pressure_levels</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mf">950.0</span><span class="p">,</span> <span class="mf">500.0</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get a reforecast grib off S3, process, and save locally as netCDF file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    s3_prefix : str</span>
+<span class="sd">        S3 key/prefix/whatever it&#39;s called of a single grib file.</span>
+<span class="sd">    latitude_bounds : Iterable[float]</span>
+<span class="sd">        An iterable that contains the latitude bounds, in degrees,</span>
+<span class="sd">        between -90-90.</span>
+<span class="sd">    longitude_bounds : Iterable[float]</span>
+<span class="sd">        An iterable that contains the longitude bounds, in degrees,</span>
+<span class="sd">        between 0-360.</span>
+<span class="sd">    forecast_days_bounds : Iterable[float]</span>
+<span class="sd">        An iterable that contains the first/last forecast days.</span>
+<span class="sd">    save_dir : str</span>
+<span class="sd">        Local directory to save resulting netCDF file.</span>
+<span class="sd">    pressure_levels : Iterable[float]</span>
+<span class="sd">        Pressure levels to extract from fields that have pressure levels.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    saved_file_path : str</span>
+<span class="sd">        The location of the saved file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base_file_name</span> <span class="o">=</span> <span class="n">s3_prefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">saved_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">.nc&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">saved_file_path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">saved_file_path</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Processing </span><span class="si">{</span><span class="n">s3_prefix</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">selection_dict</span> <span class="o">=</span> <span class="n">create_selection_dict</span><span class="p">(</span><span class="n">latitude_bounds</span><span class="p">,</span> <span class="n">longitude_bounds</span><span class="p">,</span> <span class="n">forecast_days_bounds</span><span class="p">)</span>
+
+    <span class="n">fs</span> <span class="o">=</span> <span class="n">s3fs</span><span class="o">.</span><span class="n">S3FileSystem</span><span class="p">(</span><span class="n">anon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">grib_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">base_file_name</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">fs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">s3_prefix</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">grib_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f2</span><span class="p">:</span>
+                <span class="n">f2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">try_to_open_grib_file</span><span class="p">(</span><span class="n">grib_file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="s1">&#39;isobaricInhPa&#39;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+                <span class="n">pressure_level</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pressure_levels</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;isobaricInhPa&#39;</span><span class="p">]]</span>
+                <span class="n">selection_dict</span><span class="p">[</span><span class="s1">&#39;isobaricInhPa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure_level</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">selection_dict</span><span class="p">)</span>
+            <span class="c1"># NOTE: The longitude is originally between 0-360, but</span>
+            <span class="c1"># for our purpose, we&#39;ll convert it to be between -180-180.</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;longitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="s1">&#39;longitude&#39;</span><span class="p">,),</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;longitude&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="mf">180.0</span><span class="p">,</span> <span class="mf">360.0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">180.0</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span> <span class="o">+</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="k">if</span> <span class="s1">&#39;pcp&#39;</span> <span class="ow">in</span> <span class="n">base_file_name</span><span class="p">:</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s1">&#39;step&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;step&#39;</span><span class="p">)</span>
+            <span class="c1"># now, we need to reshape the data</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="s1">&#39;number&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># set data vars to float32</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">ds</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">COMMON_COLUMNS_TO_DROP</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">saved_file_path</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Oh no! There was an issue processing </span><span class="si">{</span><span class="n">grib_file</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;All done with </span><span class="si">{</span><span class="n">saved_file_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">saved_file_path</span>
+</code></pre></div>
+
+
+<p>So we first download a grib file via <code>s3fs</code> into a temporary directory, use <code>xarray</code> and <code>cfgrib</code> to try and open up each file a number of ways, process the data via defined selection criteria, and save it locally as a netCDF file (which, at this point, is a really small file!). These functions are part of a script you can use on the command line. I use the excellent <code>click</code> for help with our command line arguments and options, and <code>joblib</code> to parallelize the entire process: </p>
+<div class="highlight"><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s1">&#39;start_date&#39;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s1">&#39;end_date&#39;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;-df&#39;</span><span class="p">,</span> <span class="s1">&#39;--date-frequency&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Date frequency between start_date and end_date&#39;</span><span class="p">,)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;--members&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;c00&#39;</span><span class="p">,],</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Gridded fields to download.&#39;</span><span class="p">,</span>
+              <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--var-names&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cape_sfc&#39;</span><span class="p">,</span> <span class="s1">&#39;cin_sfc&#39;</span><span class="p">,</span> <span class="s1">&#39;hlcy_hgt&#39;</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Gridded fields to download.&#39;</span><span class="p">,</span>
+              <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="s1">&#39;--pressure-levels&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="mf">950.0</span><span class="p">,</span> <span class="mf">500.0</span><span class="p">],</span> <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Pressure levels to use, if some pressure field is used.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--latitude-bounds&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]),</span> <span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">55</span><span class="p">),</span>
+              <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Bounds for latitude range to keep when processing data.&#39;</span><span class="p">,)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--longitude-bounds&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]),</span> <span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="mi">230</span><span class="p">,</span> <span class="mi">291</span><span class="p">),</span>
+              <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Bounds for longitude range to keep when processing data, assumes values between 0-360.&#39;</span><span class="p">,)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--forecast-days-bounds&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]),</span> <span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">),</span>
+              <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Bounds for forecast days, where something like 5.5 would be 5 days 12 hours.&#39;</span><span class="p">,)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--local-save-dir&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;./reforecast_v3&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Location to save processed data.&#39;</span><span class="p">,)</span>     
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--final-save-path&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;./combined_reforecast_data.nc&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Saved name of the combined netCDF file.&#39;</span><span class="p">,)</span>    
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--n-jobs&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of jobs to run in parallel.&#39;</span><span class="p">,)</span>
+<span class="k">def</span> <span class="nf">get_and_process_reforecast_data</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">date_frequency</span><span class="p">,</span> <span class="n">members</span><span class="p">,</span> <span class="n">var_names</span><span class="p">,</span> <span class="n">pressure_levels</span><span class="p">,</span>
+                                    <span class="n">latitude_bounds</span><span class="p">,</span> <span class="n">longitude_bounds</span><span class="p">,</span> <span class="n">forecast_days_bounds</span><span class="p">,</span>
+                                    <span class="n">local_save_dir</span><span class="p">,</span> <span class="n">final_save_path</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">):</span>
+    <span class="c1"># let&#39;s do some quick checks here...</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">latitude_bounds</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">latitude_bounds</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">90</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Latitude bounds need to be within -90 and 90, got: </span><span class="si">{</span><span class="n">latitude_bounds</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">longitude_bounds</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">longitude_bounds</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">360</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Longitude bounds must be positive and between 0-360 got: </span><span class="si">{</span><span class="n">longitude_bounds</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">forecast_days_bounds</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">forecast_days_bounds</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">16</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Forecast hour bounds must be between 0-16 days, got: </span><span class="si">{</span><span class="n">forecast_days_bounds</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">forecast_days_bounds</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="n">DAYS_PREFIX</span><span class="p">[</span><span class="s1">&#39;1-10&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="n">DAYS_PREFIX</span><span class="p">[</span><span class="s1">&#39;10-16&#39;</span><span class="p">]</span>
+    <span class="c1"># now, let&#39;s make sure the local save directory exists.</span>
+    <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">local_save_dir</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">globbed_list</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">S3_BUCKET</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">BASE_S3_PREFIX</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%Y%m</span><span class="si">%d</span><span class="s2">00&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">member</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">00&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">member</span><span class="si">}</span><span class="s1">.grib2&#39;</span>
+                    <span class="k">for</span> <span class="n">dt</span> <span class="ow">in</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">date_frequency</span><span class="si">}</span><span class="s1">D&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="n">var_names</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">members</span><span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of files to be downloaded and processed: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">globbed_list</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># TODO: Should this be async and not parallelized?</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">25</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">download_and_process_grib</span><span class="p">)(</span><span class="n">f</span><span class="p">,</span> <span class="n">latitude_bounds</span><span class="p">,</span> <span class="n">longitude_bounds</span><span class="p">,</span> <span class="n">forecast_days_bounds</span><span class="p">,</span> <span class="n">local_save_dir</span><span class="p">,</span> <span class="n">pressure_levels</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">globbed_list</span><span class="p">)</span>
+
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_save_dir</span><span class="p">,</span> <span class="s1">&#39;*.nc&#39;</span><span class="p">),</span> <span class="n">combine</span><span class="o">=</span><span class="s1">&#39;by_coords&#39;</span><span class="p">)</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">final_save_path</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;All done!&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Writing the bash script and getting it to work as expected, along with running it on my suddenly struggling MacBook (the one with the black shell!) took about 2-3 months (and probably more time off of my life due to the frustration). I would have used more compute power, but my grad department didn't have a cluster or anything, and I didn't know AWS was a thing (was it a thing back then?). In fact, it even got to the point where Tom suggested I send a cleaned/wiped hard drive that he would load all the data up on and just mail it back (assuming, of course, all of this would be ok with the government's security restrictions).</p>
+<p>Meanwhile, in 2020, I simply spun up a VM instance on Google Cloud with a bunch of cores and let it run. It took about 3-4 hours to run, which amounted to something like $10-15. Combined with the 30-60 minutes it took to write the script, we're basically looking at 5 hours of time here.</p>
+<p>Up next, exploratory data analysis and feature engineering!</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mogismog.github.io/tag/python.html">python</a>
+      <a href="https://mogismog.github.io/tag/weather.html">weather</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>
+Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+  <span class="footer-separator">|</span>
+  Switch to the <a href="javascript:void(0)" onclick="theme.switch(`dark`)">dark</a> | <a href="javascript:void(0)" onclick="theme.switch(`light`)">light</a> | <a href="javascript:void(0)" onclick="theme.switch(`browser`)">browser</a> theme
+  <script id="dark-theme-script"
+          src="https://mogismog.github.io/theme/dark-theme/dark-theme.min.js"
+          data-enable-auto-detect-theme="True"
+          data-default-theme="dark"
+          type="text/javascript">
+  </script>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " mogismog ",
+  "url" : "https://mogismog.github.io",
+  "image": "https://mogismog.github.io//images/profile.jpg",
+  "description": "Neverending Side Projects & Thoughts"
+}
+</script>
+
+
+</body>
+</html>
